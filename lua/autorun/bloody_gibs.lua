@@ -1,4 +1,4 @@
-BLOODYGIBS = BLOODYGIBS or {}
+BLOODYGIBS = {}
 BLOODYGIBS.HeadshotsEnabled = true
 BLOODYGIBS.PropKillEnabled = true
 BLOODYGIBS.ImpactSound = "Flesh_Bloody.ImpactHard"
@@ -8,6 +8,7 @@ BLOODYGIBS.Gibs = {}
 BLOODYGIBS.Gibs.Enabled = true
 BLOODYGIBS.Gibs.Lifetime = 25
 BLOODYGIBS.Gibs.Material = "models/flesh"
+BLOODYGIBS.Gibs.CanPickup = true
 
 -- Trails Config
 BLOODYGIBS.Trails = {}
@@ -19,10 +20,6 @@ BLOODYGIBS.Trails.EndWidth = 1
 BLOODYGIBS.Trails.Material = "effects/bloodstream"
 BLOODYGIBS.Trails.Color = Color( 102, 0, 0 )
 BLOODYGIBS.Trails.TextureRes = 0.1
-
-local m = 1000
-local x = 2
-local bl = 1
 
 local whitelistmodel = {
     ["models/zombie/fast.mdl"]              = true,
@@ -38,6 +35,12 @@ local blacklistmodel = {
     ["models/pigeon.mdl"]   = true,
     ["models/seagull.mdl"]  = true,
     ["models/crow.mdl"]     = true,
+}
+
+local whitelistedBloodTypes = {
+    ["0"] = true,
+    ["2"] = true,
+    ["5"] = true,
 }
 
 local function bloodtouch( ent, data )
@@ -102,16 +105,16 @@ local function spawnGib( pos, mdl, offset, shouldScale )
     ent:SetModel( mdl )
 
     if shouldScale then
-        ent:SetModelScale( math.Rand( 0.2, 0.5 ), 0 )
+        ent:SetModelScale( math.Rand( 0.1, 0.5 ), 0 )
     end
 
     if ent:IsValid() then
-        local dir = pos * x + VectorRand( m, x )
+        local dir = pos * 2 + VectorRand( 1000, 2 )
         dir:Normalize()
 
         ent:SetMaterial( BLOODYGIBS.Gibs.Material )
         ent:SetPos( pos + offset )
-        ent:SetCollisionGroup( 1 )
+        ent:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
         ent:AddCallback( "PhysicsCollide", bloodtouch )
         ent:Spawn()
         applyTrail( ent )
@@ -129,8 +132,8 @@ local function spawnMeat( pos, vec )
     if phys:IsValid() then
         phys:SetMaterial( "zombieflesh" )
         phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
-        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
-        phys:SetMass( phys:GetMass() * bl )
+        phys:AddAngleVelocity( VectorRand( 1000, 2 ) * 3000 )
+        phys:SetMass( phys:GetMass() * 1 )
     end
 end
 
@@ -141,8 +144,8 @@ local function spawnMeat2( pos, vec )
     if phys:IsValid() then
         phys:SetMaterial( "zombieflesh" )
         phys:SetVelocityInstantaneous( vec )
-        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
-        phys:SetMass( phys:GetMass() * bl )
+        phys:AddAngleVelocity( VectorRand( 1000, 2 ) * 3000 )
+        phys:SetMass( phys:GetMass() * 1 )
     end
 end
 
@@ -153,8 +156,8 @@ local function spawnMeat3( pos, vec )
     if phys:IsValid() then
         phys:SetMaterial( "zombieflesh" )
         phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
-        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
-        phys:SetMass( phys:GetMass() * bl )
+        phys:AddAngleVelocity( VectorRand( 1000, 2 ) * 3000 )
+        phys:SetMass( phys:GetMass() * 1 )
     end
 end
 
@@ -165,8 +168,8 @@ local function spawnMeat4( pos, vec )
     if phys:IsValid() then
         phys:SetMaterial( "zombieflesh" )
         phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
-        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
-        phys:SetMass( phys:GetMass() * bl )
+        phys:AddAngleVelocity( VectorRand( 1000, 2 ) * 3000 )
+        phys:SetMass( phys:GetMass() * 1 )
     end
 end
 
@@ -177,8 +180,8 @@ local function spawnMeat5( pos, vec )
     if phys:IsValid() then
         phys:SetMaterial( "zombieflesh" )
         phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
-        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
-        phys:SetMass( phys:GetMass() * bl )
+        phys:AddAngleVelocity( VectorRand( 1000, 2 ) * 3000 )
+        phys:SetMass( phys:GetMass() * 1 )
     end
 end
 
@@ -189,8 +192,8 @@ local function legs( pos, vec )
     if phys:IsValid() then
         phys:SetMaterial( "zombieflesh" )
         phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
-        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
-        phys:SetMass( phys:GetMass() * bl )
+        phys:AddAngleVelocity( VectorRand( 1000, 2 ) * 3000 )
+        phys:SetMass( phys:GetMass() * 1 )
     end
 end
 
@@ -201,8 +204,8 @@ local function legs2( pos, vec )
     if phys:IsValid() then
         phys:SetMaterial( "zombieflesh" )
         phys:SetVelocityInstantaneous( vec )
-        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
-        phys:SetMass( phys:GetMass() * bl )
+        phys:AddAngleVelocity( VectorRand( 1000, 2 ) * 3000 )
+        phys:SetMass( phys:GetMass() * 1 )
     end
 end
 
@@ -213,8 +216,8 @@ local function torso( pos, vec )
     if phys:IsValid() then
         phys:SetMaterial( "zombieflesh" )
         phys:SetVelocityInstantaneous( vec )
-        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
-        phys:SetMass( phys:GetMass() * bl )
+        phys:AddAngleVelocity( VectorRand( 1000, 2 ) * 3000 )
+        phys:SetMass( phys:GetMass() * 1 )
     end
 end
 
@@ -225,8 +228,8 @@ local function spawnSkull( pos, vec )
     if phys:IsValid() then
         phys:SetMaterial( "zombieflesh" )
         phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
-        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
-        phys:SetMass( phys:GetMass() * bl )
+        phys:AddAngleVelocity( VectorRand( 1000, 2 ) * 3000 )
+        phys:SetMass( phys:GetMass() * 1 )
     end
 end
 
@@ -256,7 +259,7 @@ local function spawnSpine( pos, vec )
 
     if phys:IsValid() then
         phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
-        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+        phys:AddAngleVelocity( VectorRand( 1000, 2 ) * 3000 )
     end
 end
 
@@ -301,13 +304,13 @@ end
 
 local function wasPropKilled( ply, dmg )
     if ply:IsNPC() then
-        return dmg:IsDamageType( DMG_CRUSH ) and target:GetBloodColor() == BLOOD_COLOR_RED
+        return dmg:IsDamageType( DMG_CRUSH ) and ply:GetBloodColor() == BLOOD_COLOR_RED and ply:Health() - dmg:GetDamage() < 1
     end
 
     return not ply:Alive() and dmg:IsDamageType( DMG_CRUSH ) and ply:GetBloodColor() == BLOOD_COLOR_RED
 end
 
-hook.Add( "DoPlayerDeath", "gibcheck", function( ply, _, dmg )
+hook.Add( "DoPlayerDeath", "bloodygibs_gibcheck", function( ply, _, dmg )
     --Explosion
     if dmg:IsExplosionDamage() and not ply:Alive() and ply:GetBloodColor() == 0 then
         timer.Create( "checkgibcooldown", 0.0005, 1, function()
@@ -324,12 +327,11 @@ hook.Add( "DoPlayerDeath", "gibcheck", function( ply, _, dmg )
 
         timer.Create( "headgonecheck", 0.005, 1, function()
             local ragdoll = ply:GetRagdollEntity()
+            local force = dmg:GetDamageForce() * 500
             spawnSkull2( eyePos, vec )
 
-            for i = 1, 3 do
-                spawnFlesh( eyePos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
-                spawnFlesh( eyePos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
-                spawnFlesh( eyePos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
+            for i = 1, 9 do
+                spawnFlesh( eyePos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 50, 150 ) + force ) )
             end
 
             local headbone = ragdoll:LookupBone( "ValveBiped.Bip01_Head1" )
@@ -341,11 +343,11 @@ hook.Add( "DoPlayerDeath", "gibcheck", function( ply, _, dmg )
                 ent:SetPos( plyPos )
                 ent:SetAngles( ply:GetAngles() )
                 ent:SetColor( ply:GetColor() )
-                ent:SetCollisionGroup( 1 )
+                ent:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
                 ent:Spawn()
-                SafeRemoveEntityDelayed( ent, 25 )
-                local phys = ent:GetPhysicsObject()
+                SafeRemoveEntityDelayed( ent, BLOODYGIBS.Gibs.Lifetime )
 
+                local phys = ent:GetPhysicsObject()
                 if phys:IsValid() then
                     phys:SetVelocity( vec )
                 end
@@ -377,8 +379,8 @@ hook.Add( "DoPlayerDeath", "gibcheck", function( ply, _, dmg )
 end )
 
 --NPC / PLR
-hook.Add( "EntityTakeDamage", "EntityDamageExample", function( target, dmg )
-    if target:GetBloodColor() == 0 then
+hook.Add( "EntityTakeDamage", "bloodygibs_npcdamage", function( target, dmg )
+    if target:GetBloodColor() == BLOOD_COLOR_RED then
         spawnFlesh( dmg:GetDamagePosition(), Vector( 0, 0, 0 ) )
         sound.Play( "physics/body/body_medium_break" .. math.random( 2, 4 ) .. ".wav", dmg:GetDamagePosition(), 77, 100, 255 )
     end
@@ -386,60 +388,65 @@ hook.Add( "EntityTakeDamage", "EntityDamageExample", function( target, dmg )
     -- NPC
     -- PROPKILL
     if wasPropKilled( target, dmg ) then
-        if target:Health() - dmg:GetDamage() < 1 then
-            if not target:IsNextBot() then
-                target:DropWeapon( nil, nil, Vector( 9999999 * math.random( -1, 1 ), 9999999 * math.random( -1, 1 ), 9999999 ) )
-            end
-
-            target:Remove()
-            legs2( target:GetPos(), target:GetVelocity() )
-            torso( target:GetPos(), target:GetVelocity() )
-            spawnMeat2( target:GetPos(), target:GetVelocity() )
-            target:Remove()
+        if not target:IsNextBot() then
+            target:DropWeapon( nil, nil, Vector( 9999999 * math.random( -1, 1 ), 9999999 * math.random( -1, 1 ), 9999999 ) )
         end
+
+        target:Remove()
+        legs2( target:GetPos(), target:GetVelocity() )
+        torso( target:GetPos(), target:GetVelocity() )
+        spawnMeat2( target:GetPos(), target:GetVelocity() )
+        target:Remove()
     end
 
     -- GIB
-    if target:GetModel() and not table.KeyFromValue( blacklistmodel, tostring( target:GetModel() ) ) and target:IsNPC() and dmg:IsExplosionDamage() and target:GetBloodColor() == 0 or target:GetModel() and target:IsNPC() and dmg:IsExplosionDamage() and target:GetBloodColor() == 2 and whitelistmodel[tostring( target:GetModel() )] or target:GetModel() and target:IsNPC() and dmg:IsExplosionDamage() and target:GetBloodColor() == 5 and not table.KeyFromValue( whitelistmodel, tostring( target:GetModel() ) ) or target:GetModel() and target:IsNPC() and dmg:IsExplosionDamage() and target:GetBloodColor() == 1 and table.KeyFromValue( whitelistmodel, tostring( target:GetModel() ) ) then
-        if target:Health() - dmg:GetDamage() < 1 then
-            if not target:IsNextBot() then
-                target:DropWeapon( nil, nil, Vector( 9999999, 9999999, 9999999 ) )
-            end
+    local isNpc = target:IsNPC()
+    local isExplosion = dmg:IsExplosionDamage()
+    local mdl = target:GetModel()
+    local hasWhitelistedModel = blacklistmodel[mdl] and false or whitelistmodel[mdl]
+    local blood = target:GetBloodColor()
+    local isDead = target:Health() - dmg:GetDamage() < 1
 
-            target:Remove()
-            local ent = target
-            local entPos = ent:GetPos()
-            local vec = ent:GetVelocity()
-            spawnSkull( ent:EyePos(), vec )
-            spawnSpine( entPos, vec )
-            spawnSpine( entPos, vec )
-            spawnMeat( entPos, vec )
-            spawnMeat( entPos, vec )
-            spawnMeat3( entPos, vec )
-            spawnMeat3( entPos, vec )
-            spawnMeat3( entPos, vec )
-            spawnMeat4( entPos, vec )
-            spawnMeat4( entPos, vec )
-            spawnMeat4( entPos, vec )
-            spawnMeat4( entPos, vec )
-            spawnMeat5( entPos, vec )
-            spawnMeat5( entPos, vec )
-            legs( ent:GetPos(), vec )
-            target:Remove()
+    if isNpc and isExplosion and hasWhitelistedModel and whitelistedBloodTypes[tostring( blood )] and isDead then
+        if not target:IsNextBot() then
+            target:DropWeapon( nil, nil, Vector( 9999999 * math.random( -1, 1 ), 9999999 * math.random( -1, 1 ), 9999999 ) )
         end
+
+        target:Remove()
+        local ent = target
+        local entPos = ent:GetPos()
+        local vec = ent:GetVelocity()
+        spawnSkull( ent:EyePos(), vec )
+        spawnSpine( entPos, vec )
+        spawnSpine( entPos, vec )
+        spawnMeat( entPos, vec )
+        spawnMeat( entPos, vec )
+        spawnMeat3( entPos, vec )
+        spawnMeat3( entPos, vec )
+        spawnMeat3( entPos, vec )
+        spawnMeat4( entPos, vec )
+        spawnMeat4( entPos, vec )
+        spawnMeat4( entPos, vec )
+        spawnMeat4( entPos, vec )
+        spawnMeat5( entPos, vec )
+        spawnMeat5( entPos, vec )
+        legs( ent:GetPos(), vec )
+        target:Remove()
     end
 
     -- HEADSHOT
-    hook.Add( "ScaleNPCDamage", "NPCGIB", function( npc, hitgroup, dmginfo )
+    hook.Add( "ScaleNPCDamage", "bloodygibs_npc_gib", function( npc, hitgroup, dmginfo )
         local vec = npc:GetVelocity()
         local npcpos = npc:GetPos()
-        local healthcur = npc:Health() - dmginfo:GetDamage()
+        local isDead = npc:Health() - dmginfo:GetDamage()
+        local wasBullet = dmginfo:GetDamageType() == DMG_BULLET
+        local redBlood = npc:GetBloodColor() == BLOOD_COLOR_RED
 
-        if healthcur < 1 and dmginfo:GetDamageType() == 2 and npc:GetBloodColor() == 0 and hitgroup == 1 and BLOODYGIBS.HeadshotsEnabled then
+        if isDead and wasBullet and redBlood and hitgroup == HITGROUP_HEAD and BLOODYGIBS.HeadshotsEnabled then
             local pos = npc:EyePos()
 
             if not npc:IsNextBot() then
-                npc:DropWeapon( nil, nil, Vector( 9999999, 9999999, 9999999 ) )
+                npc:DropWeapon( nil, nil, Vector( 9999999 * math.random( -1, 1 ), 9999999 * math.random( -1, 1 ), 9999999 ) )
             end
 
             npc:Remove()
@@ -460,12 +467,12 @@ hook.Add( "EntityTakeDamage", "EntityDamageExample", function( target, dmg )
                 enty:SetPos( npcpos )
                 enty:SetAngles( npc:GetAngles() )
                 enty:SetColor( npc:GetColor() )
-                enty:SetCollisionGroup( 1 )
+                enty:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
                 enty:SetSkin( npc:GetSkin() )
                 enty:Spawn()
-                SafeRemoveEntityDelayed( enty, 25 )
-                local phys = enty:GetPhysicsObject()
+                SafeRemoveEntityDelayed( enty, BLOODYGIBS.Gibs.Lifetime )
 
+                local phys = enty:GetPhysicsObject()
                 if phys:IsValid() then
                     phys:SetVelocity( vec )
                 end
@@ -473,7 +480,10 @@ hook.Add( "EntityTakeDamage", "EntityDamageExample", function( target, dmg )
         end
     end )
 
-    hook.Add( "AllowPlayerPickup", "AllowAdminsPickUp", function( ply, ent )
-        if ent:GetMaterial() == BLOODYGIBS.Gibs.Material and ent:GetCollisionGroup() == 1 or ent:GetCollisionGroup() == 1 then return false end
+    hook.Add( "AllowPlayerPickup", "bloodygibs_gibspickup", function( _, ent )
+        local isDebris = ent:GetCollisionGroup() == COLLISION_GROUP_DEBRIS
+        if ent:GetMaterial() == BLOODYGIBS.Gibs.Material and isDebris then
+            return BLOODYGIBS.Gibs.CanPickup
+        end
     end )
 end )
