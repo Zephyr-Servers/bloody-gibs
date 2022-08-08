@@ -14,14 +14,14 @@ BLOODYGIBS.Gibs.CanPickup = true
 BLOODYGIBS.Trails = {}
 BLOODYGIBS.Trails.Enabled = true
 BLOODYGIBS.Trails.TrailsEnabled = true
-BLOODYGIBS.Trails.Lifetime = 7
-BLOODYGIBS.Trails.StartWidth = 10
+BLOODYGIBS.Trails.Lifetime = 3
+BLOODYGIBS.Trails.StartWidth = 7
 BLOODYGIBS.Trails.EndWidth = 1
 BLOODYGIBS.Trails.Material = "effects/bloodstream"
 BLOODYGIBS.Trails.Color = Color( 102, 0, 0 )
 BLOODYGIBS.Trails.TextureRes = 0.1
 
-local whitelistmodel = {
+local whitelistedModels = {
     ["models/zombie/fast.mdl"]              = true,
     ["models/zombie/zombie_soldier.mdl"]    = true,
     ["models/zombie/classic.mdl"]           = true,
@@ -31,7 +31,7 @@ local whitelistmodel = {
     ["models/vortigaunt_slave.mdl"]         = true,
 }
 
-local blacklistmodel = {
+local blacklistedModels = {
     ["models/pigeon.mdl"]   = true,
     ["models/seagull.mdl"]  = true,
     ["models/crow.mdl"]     = true,
@@ -327,7 +327,7 @@ hook.Add( "DoPlayerDeath", "bloodygibs_gibcheck", function( ply, _, dmg )
 
         timer.Create( "headgonecheck", 0.005, 1, function()
             local ragdoll = ply:GetRagdollEntity()
-            local force = dmg:GetDamageForce() * 500
+            local force = dmg:GetDamageForce() * 9999999
             spawnSkull2( eyePos, vec )
 
             for i = 1, 9 do
@@ -403,7 +403,7 @@ hook.Add( "EntityTakeDamage", "bloodygibs_npcdamage", function( target, dmg )
     local isNpc = target:IsNPC()
     local isExplosion = dmg:IsExplosionDamage()
     local mdl = target:GetModel()
-    local hasWhitelistedModel = blacklistmodel[mdl] and false or whitelistmodel[mdl]
+    local hasWhitelistedModel = blacklistedModels[mdl] and false or whitelistedModels[mdl]
     local blood = target:GetBloodColor()
     local isDead = target:Health() - dmg:GetDamage() < 1
 
@@ -438,12 +438,13 @@ hook.Add( "EntityTakeDamage", "bloodygibs_npcdamage", function( target, dmg )
     hook.Add( "ScaleNPCDamage", "bloodygibs_npc_gib", function( npc, hitgroup, dmginfo )
         local vec = npc:GetVelocity()
         local npcpos = npc:GetPos()
-        local isDead = npc:Health() - dmginfo:GetDamage()
+        local isDead = npc:Health() - dmginfo:GetDamage() < 1
         local wasBullet = dmginfo:GetDamageType() == DMG_BULLET
         local redBlood = npc:GetBloodColor() == BLOOD_COLOR_RED
 
         if isDead and wasBullet and redBlood and hitgroup == HITGROUP_HEAD and BLOODYGIBS.HeadshotsEnabled then
             local pos = npc:EyePos()
+            local force = dmg:GetDamageForce() * 9999999
 
             if not npc:IsNextBot() then
                 npc:DropWeapon( nil, nil, Vector( 9999999 * math.random( -1, 1 ), 9999999 * math.random( -1, 1 ), 9999999 ) )
@@ -452,27 +453,25 @@ hook.Add( "EntityTakeDamage", "bloodygibs_npcdamage", function( target, dmg )
             npc:Remove()
             spawnSkull2( pos, vec )
 
-            for i = 1, 3 do
-                spawnFlesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
-                spawnFlesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
-                spawnFlesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
+            for i = 1, 9 do
+                spawnFlesh( pos, vec + force + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 50, 150 ) ) )
             end
 
             local headbone = npc:LookupBone( "ValveBiped.Bip01_Head1" )
 
             if headbone then
-                local enty = ents.Create( "prop_ragdoll" )
-                enty:SetModel( npc:GetModel() )
-                enty:ManipulateBoneScale( headbone, Vector( 0.001, 0.001, 0.001 ) )
-                enty:SetPos( npcpos )
-                enty:SetAngles( npc:GetAngles() )
-                enty:SetColor( npc:GetColor() )
-                enty:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
-                enty:SetSkin( npc:GetSkin() )
-                enty:Spawn()
-                SafeRemoveEntityDelayed( enty, BLOODYGIBS.Gibs.Lifetime )
+                local ent = ents.Create( "prop_ragdoll" )
+                ent:SetModel( npc:GetModel() )
+                ent:ManipulateBoneScale( headbone, Vector( 0.001, 0.001, 0.001 ) )
+                ent:SetPos( npcpos )
+                ent:SetAngles( npc:GetAngles() )
+                ent:SetColor( npc:GetColor() )
+                ent:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
+                ent:SetSkin( npc:GetSkin() )
+                ent:Spawn()
+                SafeRemoveEntityDelayed( ent, BLOODYGIBS.Gibs.Lifetime )
 
-                local phys = enty:GetPhysicsObject()
+                local phys = ent:GetPhysicsObject()
                 if phys:IsValid() then
                     phys:SetVelocity( vec )
                 end
