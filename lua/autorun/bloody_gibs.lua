@@ -1,5 +1,6 @@
 BLOODYGIBS = BLOODYGIBS or {}
 BLOODYGIBS.HeadshotsEnabled = true
+BLOODYGIBS.PropKillEnabled = true
 BLOODYGIBS.ImpactSound = "Flesh_Bloody.ImpactHard"
 
 -- Gibs Config
@@ -57,25 +58,25 @@ local function bloodtouch( ent, data )
     end
 end
 
-concommand.Add( "disable_gib_trails", function( ply, cmd, args )
+concommand.Add( "bloodygibs_disable_gib_trails", function( ply, _, _ )
     if ply:IsSuperAdmin() then
         BLOODYGIBS.Trails.Enabled = false
     end
 end )
 
-concommand.Add( "enable_gib_trails", function( ply, cmd, args )
+concommand.Add( "bloodygibs_enable_gib_trails", function( ply, _, _ )
     if ply:IsSuperAdmin() then
         BLOODYGIBS.Trails.Enabled = true
     end
 end )
 
-concommand.Add( "enable_headshot_effect", function( ply, cmd, args )
+concommand.Add( "bloodygibs_enable_headshot_effect", function( ply, _, _ )
     if ply:IsSuperAdmin() then
         BLOODYGIBS.HeadshotsEnabled = true
     end
 end )
 
-concommand.Add( "disable_headshot_effect", function( ply, cmd, args )
+concommand.Add( "bloodygibs_disable_headshot_effect", function( ply, _, _ )
     if ply:IsSuperAdmin() then
         BLOODYGIBS.HeadshotsEnabled = false
     end
@@ -94,7 +95,7 @@ local function applyTrail( ent )
     util.SpriteTrail( ent, 0, col, false, sw, ew, lifetime, res, mat )
 end
 
-local function spawnGib( pos, vec, mdl, offset, shouldScale )
+local function spawnGib( pos, mdl, offset, shouldScale )
     if not offset then offset = Vector( 0, 0, 0 ) end
 
     local ent = ents.Create( "prop_physics" )
@@ -115,102 +116,220 @@ local function spawnGib( pos, vec, mdl, offset, shouldScale )
         ent:Spawn()
         applyTrail( ent )
 
-        local phys = ent:GetPhysicsObject()
-        if phys:IsValid() then
-            phys:SetMaterial( "zombieflesh" )
-            phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
-            phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
-            phys:SetMass( phys:GetMass() * bl )
-        end
-
         SafeRemoveEntityDelayed( ent, BLOODYGIBS.Gibs.Lifetime )
+    end
+
+    return ent
+end
+
+local function spawnMeat( pos, vec )
+    local ent = spawnGib( pos, "models/props_junk/Rock001a.mdl", Vector( -10, 0, 45 ) )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
+        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+        phys:SetMass( phys:GetMass() * bl )
     end
 end
 
-local function spawnmeat( pos, vec )
-    spawnGib( pos, vec, "models/props_junk/Rock001a.mdl", Vector( -10, 0, 45 ) )
+local function spawnMeat2( pos, vec )
+    local ent = spawnGib( pos, "models/props_junk/Rock001a.mdl", Vector( -10, 0, 45 ) )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec )
+        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+        phys:SetMass( phys:GetMass() * bl )
+    end
 end
 
-local function spawnmeat2( pos, vec )
-    spawnGib( pos, vec, "models/props_junk/watermelon01_chunk01b.mdl", Vector( 0, 0, 55 ) )
+local function spawnMeat3( pos, vec )
+    local ent = spawnGib( pos, "models/props_junk/watermelon01_chunk01b.mdl", Vector( 0, 0, 55 ) )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
+        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+        phys:SetMass( phys:GetMass() * bl )
+    end
 end
 
-local function spawnmeat3( pos, vec )
-    spawnGib( pos, vec, "models/props_junk/watermelon01_chunk01a.mdl", Vector( 0, 0, 30 ) )
+local function spawnMeat4( pos, vec )
+    local ent = spawnGib( pos, "models/props_junk/watermelon01_chunk01a.mdl", Vector( 0, 0, 30 ) )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
+        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+        phys:SetMass( phys:GetMass() * bl )
+    end
 end
 
-local function spawnmeat4( pos, vec )
-    spawnGib( pos, vec, "models/gibs/hgibs_spine.mdl", Vector( 0, 0, 30 ) )
+local function spawnMeat5( pos, vec )
+    local ent = spawnGib( pos, "models/gibs/hgibs_spine.mdl", Vector( 0, 0, 30 ) )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
+        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+        phys:SetMass( phys:GetMass() * bl )
+    end
 end
 
 local function legs( pos, vec )
-    spawnGib( pos, vec, "models/gibs/fast_zombie_legs.mdl" )
+    local ent = spawnGib( pos, "models/gibs/fast_zombie_legs.mdl" )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
+        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+        phys:SetMass( phys:GetMass() * bl )
+    end
+end
+
+local function legs2( pos, vec )
+    local ent = spawnGib( pos, "models/gibs/fast_zombie_legs.mdl" )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec )
+        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+        phys:SetMass( phys:GetMass() * bl )
+    end
 end
 
 local function torso( pos, vec )
-    spawnGib( pos, vec, "models/gibs/fast_zombie_torso.mdl", Vector( 0, 0, 15 ) )
+    local ent = spawnGib( pos, "models/gibs/fast_zombie_torso.mdl", Vector( 0, 0, 15 ) )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec )
+        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+        phys:SetMass( phys:GetMass() * bl )
+    end
 end
 
-local function spawnskull( pos, vec )
-    spawnGib( pos, vec, "models/gibs/hgibs.mdl" )
+local function spawnSkull( pos, vec )
+    local ent = spawnGib( pos, "models/gibs/hgibs.mdl" )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
+        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+        phys:SetMass( phys:GetMass() * bl )
+    end
 end
 
-local function spawnflesh( pos, vec )
-    spawnGib( pos, vec, "models/props_junk/Rock001a.mdl", nil, true )
+local function spawnSkull2( pos, vec )
+    local ent = spawnGib( pos, "models/gibs/hgibs.mdl" )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec )
+    end
 end
 
-local function spawnspine( pos, vec )
-    spawnGib( pos, vec, "models/gibs/hgibs_spine.mdl" )
+local function spawnFlesh( pos, vec )
+    local ent = spawnGib( pos, "models/props_junk/Rock001a.mdl", nil, true )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetMaterial( "zombieflesh" )
+        phys:SetVelocityInstantaneous( vec )
+    end
 end
 
-hook.Add( "DoPlayerDeath", "gibcheck", function( ply, attacker, dmg )
+local function spawnSpine( pos, vec )
+    local ent = spawnGib( pos, "models/gibs/hgibs_spine.mdl" )
+    local phys = ent:GetPhysicsObject()
+
+    if phys:IsValid() then
+        phys:SetVelocityInstantaneous( vec + Vector( math.Rand( -250, 500 ), math.Rand( -250, 500 ), math.Rand( 250, 500 ) ) )
+        phys:AddAngleVelocity( VectorRand( m, x ) * 3000 )
+    end
+end
+
+local function spawnPlayerBody( ply )
+    local ragdoll = ply:GetRagdollEntity()
+    local pos = ply:GetPos()
+    local vec = ply:GetVelocity()
+
+    spawnSkull( ply:EyePos(), vec )
+    spawnSpine( pos, vec )
+    spawnSpine( pos, vec )
+    spawnMeat( pos, vec )
+    spawnMeat( pos, vec )
+    spawnMeat3( pos, vec )
+    spawnMeat3( pos, vec )
+    spawnMeat3( pos, vec )
+    spawnMeat4( pos, vec )
+    spawnMeat4( pos, vec )
+    spawnMeat4( pos, vec )
+    spawnMeat4( pos, vec )
+    spawnMeat5( pos, vec )
+    spawnMeat5( pos, vec )
+    legs( pos, vec )
+
+    for i = 1, 2 do
+        if ragdoll:IsValid() then
+            timer.Create( "checkcooldown", 0.01, 1, function()
+                ragdoll:Remove()
+            end )
+        end
+    end
+end
+
+local function wasHeadShot( ply, dmg )
+    local inHead = ply:LastHitGroup() == HITGROUP_HEAD
+    local alive = ply:Alive()
+    local wasBullet = dmg:IsDamageType( DMG_BULLET )
+    local bloodRed = ply:GetBloodColor() == BLOOD_COLOR_RED
+
+    return wasBullet and inHead and not alive and bloodRed
+end
+
+local function wasPropKilled( ply, dmg )
+    if ply:IsNPC() then
+        return dmg:IsDamageType( DMG_CRUSH ) and target:GetBloodColor() == BLOOD_COLOR_RED
+    end
+
+    return not ply:Alive() and dmg:IsDamageType( DMG_CRUSH ) and ply:GetBloodColor() == BLOOD_COLOR_RED
+end
+
+hook.Add( "DoPlayerDeath", "gibcheck", function( ply, _, dmg )
     --Explosion
-    if dmg:IsExplosionDamage() and ply:Alive() == false and ply:GetBloodColor() == 0 then
+    if dmg:IsExplosionDamage() and not ply:Alive() and ply:GetBloodColor() == 0 then
         timer.Create( "checkgibcooldown", 0.0005, 1, function()
-            local ragdoll = ply:GetRagdollEntity()
-            local pos = ply:GetPos()
-            local vec = ply:GetVelocity()
-            spawnskull( ply:EyePos(), vec )
-            spawnspine( pos, vec )
-            spawnspine( pos, vec )
-            spawnmeat( pos, vec )
-            spawnmeat( pos, vec )
-            spawnmeat2( pos, vec )
-            spawnmeat2( pos, vec )
-            spawnmeat2( pos, vec )
-            spawnmeat3( pos, vec )
-            spawnmeat3( pos, vec )
-            spawnmeat3( pos, vec )
-            spawnmeat3( pos, vec )
-            spawnmeat4( pos, vec )
-            spawnmeat4( pos, vec )
-            legs( pos, vec )
-
-            for i = 1, 2 do
-                if ragdoll:IsValid() then
-                    timer.Create( "checkcooldown", 0.01, 1, function()
-                        ragdoll:Remove()
-                    end )
-                end
-            end
+            spawnPlayerBody( ply )
         end )
     end
 
     --Headshot
     local vec = ply:GetVelocity()
-    local plypos = ply:GetPos()
+    local plyPos = ply:GetPos()
 
-    if ply:LastHitGroup() == 1 and ply:Alive() == false and dmg:IsDamageType( 2 ) and ply:GetBloodColor() == 0 and BLOODYGIBS.HeadshotsEnabled then
-        local pos = ply:EyePos()
+    if BLOODYGIBS.HeadshotsEnabled and wasHeadShot( ply, dmg ) then
+        local eyePos = ply:EyePos()
 
         timer.Create( "headgonecheck", 0.005, 1, function()
             local ragdoll = ply:GetRagdollEntity()
-            spawnskull( pos, vec )
+            spawnSkull2( eyePos, vec )
 
             for i = 1, 3 do
-                spawnflesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
-                spawnflesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
-                spawnflesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
+                spawnFlesh( eyePos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
+                spawnFlesh( eyePos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
+                spawnFlesh( eyePos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
             end
 
             local headbone = ragdoll:LookupBone( "ValveBiped.Bip01_Head1" )
@@ -219,7 +338,7 @@ hook.Add( "DoPlayerDeath", "gibcheck", function( ply, attacker, dmg )
                 local ent = ents.Create( "prop_ragdoll" )
                 ent:SetModel( ply:GetModel() )
                 ent:ManipulateBoneScale( headbone, Vector( 0.001, 0.001, 0.001 ) )
-                ent:SetPos( plypos )
+                ent:SetPos( plyPos )
                 ent:SetAngles( ply:GetAngles() )
                 ent:SetColor( ply:GetColor() )
                 ent:SetCollisionGroup( 1 )
@@ -241,11 +360,11 @@ hook.Add( "DoPlayerDeath", "gibcheck", function( ply, attacker, dmg )
     end
 
     --Prop Kill
-    if ply:Alive() == false and dmg:IsDamageType( 1 ) and ply:GetBloodColor() == 0 then
+    if wasPropKilled( ply, dmg ) then
         timer.Create( "checkcooldown001", 0.05, 1, function()
-            legs( ply:GetPos(), vec )
-            torso( ply:GetPos(), vec )
-            spawnmeat( ply:GetPos(), vec )
+            legs2( plyPos, vec )
+            torso( plyPos, vec )
+            spawnMeat2( plyPos, vec )
             local ragdoll = ply:GetRagdollEntity()
 
             if ragdoll:IsValid() then
@@ -260,27 +379,27 @@ end )
 --NPC / PLR
 hook.Add( "EntityTakeDamage", "EntityDamageExample", function( target, dmg )
     if target:GetBloodColor() == 0 then
-        spawnflesh( dmg:GetDamagePosition(), Vector( 0, 0, 0 ) )
+        spawnFlesh( dmg:GetDamagePosition(), Vector( 0, 0, 0 ) )
         sound.Play( "physics/body/body_medium_break" .. math.random( 2, 4 ) .. ".wav", dmg:GetDamagePosition(), 77, 100, 255 )
     end
 
     -- NPC
-    --PROPKILL
-    if target:IsNPC() and dmg:IsDamageType( 1 ) and target:GetBloodColor() == 0 then
+    -- PROPKILL
+    if wasPropKilled( target, dmg ) then
         if target:Health() - dmg:GetDamage() < 1 then
             if not target:IsNextBot() then
-                target:DropWeapon( nil, nil, Vector( 9999999, 9999999, 9999999 ) )
+                target:DropWeapon( nil, nil, Vector( 9999999 * math.random( -1, 1 ), 9999999 * math.random( -1, 1 ), 9999999 ) )
             end
 
             target:Remove()
-            legs( target:GetPos(), target:GetVelocity() )
+            legs2( target:GetPos(), target:GetVelocity() )
             torso( target:GetPos(), target:GetVelocity() )
-            spawnmeat( target:GetPos(), target:GetVelocity() )
+            spawnMeat2( target:GetPos(), target:GetVelocity() )
             target:Remove()
         end
     end
 
-    --GIB
+    -- GIB
     if target:GetModel() and not table.KeyFromValue( blacklistmodel, tostring( target:GetModel() ) ) and target:IsNPC() and dmg:IsExplosionDamage() and target:GetBloodColor() == 0 or target:GetModel() and target:IsNPC() and dmg:IsExplosionDamage() and target:GetBloodColor() == 2 and whitelistmodel[tostring( target:GetModel() )] or target:GetModel() and target:IsNPC() and dmg:IsExplosionDamage() and target:GetBloodColor() == 5 and not table.KeyFromValue( whitelistmodel, tostring( target:GetModel() ) ) or target:GetModel() and target:IsNPC() and dmg:IsExplosionDamage() and target:GetBloodColor() == 1 and table.KeyFromValue( whitelistmodel, tostring( target:GetModel() ) ) then
         if target:Health() - dmg:GetDamage() < 1 then
             if not target:IsNextBot() then
@@ -289,27 +408,28 @@ hook.Add( "EntityTakeDamage", "EntityDamageExample", function( target, dmg )
 
             target:Remove()
             local ent = target
+            local entPos = ent:GetPos()
             local vec = ent:GetVelocity()
-            spawnspine( ent:GetPos(), vec )
-            spawnspine( ent:GetPos(), vec )
-            spawnskull( ent:EyePos(), vec )
-            spawnmeat3( ent:GetPos(), vec )
-            spawnmeat2( ent:GetPos(), vec )
-            spawnmeat3( ent:GetPos(), vec )
-            spawnmeat2( ent:GetPos(), vec )
-            spawnmeat3( ent:GetPos(), vec )
-            spawnmeat2( ent:GetPos(), vec )
-            spawnmeat( ent:GetPos(), vec )
-            spawnmeat( ent:GetPos(), vec )
-            spawnmeat3( ent:GetPos(), vec )
-            spawnmeat4( ent:GetPos(), vec )
-            spawnmeat4( ent:GetPos(), vec )
+            spawnSkull( ent:EyePos(), vec )
+            spawnSpine( entPos, vec )
+            spawnSpine( entPos, vec )
+            spawnMeat( entPos, vec )
+            spawnMeat( entPos, vec )
+            spawnMeat3( entPos, vec )
+            spawnMeat3( entPos, vec )
+            spawnMeat3( entPos, vec )
+            spawnMeat4( entPos, vec )
+            spawnMeat4( entPos, vec )
+            spawnMeat4( entPos, vec )
+            spawnMeat4( entPos, vec )
+            spawnMeat5( entPos, vec )
+            spawnMeat5( entPos, vec )
             legs( ent:GetPos(), vec )
             target:Remove()
         end
     end
 
-    --HEADSHOT
+    -- HEADSHOT
     hook.Add( "ScaleNPCDamage", "NPCGIB", function( npc, hitgroup, dmginfo )
         local vec = npc:GetVelocity()
         local npcpos = npc:GetPos()
@@ -323,12 +443,12 @@ hook.Add( "EntityTakeDamage", "EntityDamageExample", function( target, dmg )
             end
 
             npc:Remove()
-            spawnskull( pos, vec )
+            spawnSkull2( pos, vec )
 
             for i = 1, 3 do
-                spawnflesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
-                spawnflesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
-                spawnflesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
+                spawnFlesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
+                spawnFlesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
+                spawnFlesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 25, 50 ) ) )
             end
 
             local headbone = npc:LookupBone( "ValveBiped.Bip01_Head1" )
@@ -354,6 +474,6 @@ hook.Add( "EntityTakeDamage", "EntityDamageExample", function( target, dmg )
     end )
 
     hook.Add( "AllowPlayerPickup", "AllowAdminsPickUp", function( ply, ent )
-        if ent:GetMaterial() == "models/flesh" and ent:GetCollisionGroup() == 1 or ent:GetCollisionGroup() == 1 then return false end
+        if ent:GetMaterial() == BLOODYGIBS.Gibs.Material and ent:GetCollisionGroup() == 1 or ent:GetCollisionGroup() == 1 then return false end
     end )
 end )
