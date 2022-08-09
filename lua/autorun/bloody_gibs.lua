@@ -98,10 +98,10 @@ local function applyTrail( ent )
     util.SpriteTrail( ent, 0, col, false, sw, ew, lifetime, res, mat )
 end
 
-local function spawnGib( pos, mdl, offset, shouldScale )
+local function spawnGib( pos, mdl, offset, shouldScale, isRagdoll )
     if not offset then offset = Vector( 0, 0, 0 ) end
 
-    local ent = ents.Create( "prop_physics" )
+    local ent = isRagdoll and ents.Create( "prop_ragdoll" ) or ents.Create( "prop_physics" )
     ent:SetModel( mdl )
 
     if shouldScale then
@@ -186,7 +186,7 @@ local function spawnMeat5( pos, vec )
 end
 
 local function legs( pos, vec )
-    local ent = spawnGib( pos, "models/gibs/fast_zombie_legs.mdl" )
+    local ent = spawnGib( pos, "models/gibs/fast_zombie_legs.mdl", nil, nil, true )
     local phys = ent:GetPhysicsObject()
 
     if phys:IsValid() then
@@ -198,7 +198,7 @@ local function legs( pos, vec )
 end
 
 local function legs2( pos, vec )
-    local ent = spawnGib( pos, "models/gibs/fast_zombie_legs.mdl" )
+    local ent = spawnGib( pos, "models/gibs/fast_zombie_legs.mdl", nil, nil, true )
     local phys = ent:GetPhysicsObject()
 
     if phys:IsValid() then
@@ -210,7 +210,7 @@ local function legs2( pos, vec )
 end
 
 local function torso( pos, vec )
-    local ent = spawnGib( pos, "models/gibs/fast_zombie_torso.mdl", Vector( 0, 0, 15 ) )
+    local ent = spawnGib( pos, "models/gibs/fast_zombie_torso.mdl", Vector( 0, 0, 15 ), nil, true )
     local phys = ent:GetPhysicsObject()
 
     if phys:IsValid() then
@@ -295,24 +295,27 @@ end
 
 local function wasHeadShot( ply, dmg )
     local inHead = ply:LastHitGroup() == HITGROUP_HEAD
-    local alive = ply:Alive()
+    local dead = not ply:Alive()
     local wasBullet = dmg:IsDamageType( DMG_BULLET )
-    local bloodRed = ply:GetBloodColor() == BLOOD_COLOR_RED
+    local bloodRed = ply:IsPlayer() and true or ply:GetBloodColor() == BLOOD_COLOR_RED
 
-    return wasBullet and inHead and not alive and bloodRed
+    return wasBullet and inHead and dead and bloodRed
 end
 
 local function wasPropKilled( ply, dmg )
     if ply:IsNPC() then
         return dmg:IsDamageType( DMG_CRUSH ) and ply:GetBloodColor() == BLOOD_COLOR_RED and ply:Health() - dmg:GetDamage() < 1
+    elseif ply:IsPlayer() then
+        return not ply:Alive() and dmg:IsDamageType( DMG_CRUSH ) and not dmg:IsDamageType( DMG_DISSOLVE )
     end
 
-    return not ply:Alive() and dmg:IsDamageType( DMG_CRUSH ) and ply:GetBloodColor() == BLOOD_COLOR_RED
+    return false
 end
 
 hook.Add( "DoPlayerDeath", "bloodygibs_gibcheck", function( ply, _, dmg )
+    print( dmg:GetDamageType() )
     --Explosion
-    if dmg:IsExplosionDamage() and not ply:Alive() and ply:GetBloodColor() == 0 then
+    if dmg:IsExplosionDamage() and not ply:Alive() then
         timer.Create( "checkgibcooldown", 0.0005, 1, function()
             spawnPlayerBody( ply )
         end )
@@ -327,11 +330,10 @@ hook.Add( "DoPlayerDeath", "bloodygibs_gibcheck", function( ply, _, dmg )
 
         timer.Create( "headgonecheck", 0.005, 1, function()
             local ragdoll = ply:GetRagdollEntity()
-            local force = dmg:GetDamageForce() * 9999999
             spawnSkull2( eyePos, vec )
 
             for i = 1, 9 do
-                spawnFlesh( eyePos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 50, 150 ) + force ) )
+                spawnFlesh( eyePos, vec + Vector( math.Rand( -75, 75 ), math.Rand( -75, 75 ), math.Rand( 50, 150 ) ) )
             end
 
             local headbone = ragdoll:LookupBone( "ValveBiped.Bip01_Head1" )
@@ -397,6 +399,8 @@ hook.Add( "EntityTakeDamage", "bloodygibs_npcdamage", function( target, dmg )
         torso( target:GetPos(), target:GetVelocity() )
         spawnMeat2( target:GetPos(), target:GetVelocity() )
         target:Remove()
+
+        return
     end
 
     -- GIB
@@ -433,56 +437,55 @@ hook.Add( "EntityTakeDamage", "bloodygibs_npcdamage", function( target, dmg )
         legs( ent:GetPos(), vec )
         target:Remove()
     end
+end )
 
-    -- HEADSHOT
-    hook.Add( "ScaleNPCDamage", "bloodygibs_npc_gib", function( npc, hitgroup, dmginfo )
-        local vec = npc:GetVelocity()
-        local npcpos = npc:GetPos()
-        local isDead = npc:Health() - dmginfo:GetDamage() < 1
-        local wasBullet = dmginfo:GetDamageType() == DMG_BULLET
-        local redBlood = npc:GetBloodColor() == BLOOD_COLOR_RED
+-- NPC HEADSHOTS
+hook.Add( "ScaleNPCDamage", "bloodygibs_npc_gib", function( npc, hitgroup, dmginfo )
+    local vec = npc:GetVelocity()
+    local npcpos = npc:GetPos()
+    local isDead = npc:Health() - dmginfo:GetDamage() < 1
+    local wasBullet = dmginfo:GetDamageType() == DMG_BULLET
+    local redBlood = npc:GetBloodColor() == BLOOD_COLOR_RED
 
-        if isDead and wasBullet and redBlood and hitgroup == HITGROUP_HEAD and BLOODYGIBS.HeadshotsEnabled then
-            local pos = npc:EyePos()
-            local force = dmg:GetDamageForce() * 9999999
+    if isDead and wasBullet and redBlood and hitgroup == HITGROUP_HEAD and BLOODYGIBS.HeadshotsEnabled then
+        local pos = npc:EyePos()
 
-            if not npc:IsNextBot() then
-                npc:DropWeapon( nil, nil, Vector( 9999999 * math.random( -1, 1 ), 9999999 * math.random( -1, 1 ), 9999999 ) )
-            end
+        if not npc:IsNextBot() then
+            npc:DropWeapon( nil, nil, Vector( 9999999 * math.random( -1, 1 ), 9999999 * math.random( -1, 1 ), 9999999 ) )
+        end
 
-            npc:Remove()
-            spawnSkull2( pos, vec )
+        npc:Remove()
+        spawnSkull2( pos, vec )
 
-            for i = 1, 9 do
-                spawnFlesh( pos, vec + force + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 50, 150 ) ) )
-            end
+        for i = 1, 9 do
+            spawnFlesh( pos, vec + Vector( math.Rand( 25, 50 ), math.Rand( 25, 50 ), math.Rand( 150, 250 ) ) )
+        end
 
-            local headbone = npc:LookupBone( "ValveBiped.Bip01_Head1" )
+        local headbone = npc:LookupBone( "ValveBiped.Bip01_Head1" )
 
-            if headbone then
-                local ent = ents.Create( "prop_ragdoll" )
-                ent:SetModel( npc:GetModel() )
-                ent:ManipulateBoneScale( headbone, Vector( 0.001, 0.001, 0.001 ) )
-                ent:SetPos( npcpos )
-                ent:SetAngles( npc:GetAngles() )
-                ent:SetColor( npc:GetColor() )
-                ent:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
-                ent:SetSkin( npc:GetSkin() )
-                ent:Spawn()
-                SafeRemoveEntityDelayed( ent, BLOODYGIBS.Gibs.Lifetime )
+        if headbone then
+            local ent = ents.Create( "prop_ragdoll" )
+            ent:SetModel( npc:GetModel() )
+            ent:ManipulateBoneScale( headbone, Vector( 0.001, 0.001, 0.001 ) )
+            ent:SetPos( npcpos )
+            ent:SetAngles( npc:GetAngles() )
+            ent:SetColor( npc:GetColor() )
+            ent:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
+            ent:SetSkin( npc:GetSkin() )
+            ent:Spawn()
+            SafeRemoveEntityDelayed( ent, BLOODYGIBS.Gibs.Lifetime )
 
-                local phys = ent:GetPhysicsObject()
-                if phys:IsValid() then
-                    phys:SetVelocity( vec )
-                end
+            local phys = ent:GetPhysicsObject()
+            if phys:IsValid() then
+                phys:SetVelocity( vec )
             end
         end
-    end )
+    end
+end )
 
-    hook.Add( "AllowPlayerPickup", "bloodygibs_gibspickup", function( _, ent )
-        local isDebris = ent:GetCollisionGroup() == COLLISION_GROUP_DEBRIS
-        if ent:GetMaterial() == BLOODYGIBS.Gibs.Material and isDebris then
-            return BLOODYGIBS.Gibs.CanPickup
-        end
-    end )
+hook.Add( "AllowPlayerPickup", "bloodygibs_gibspickup", function( _, ent )
+    local isDebris = ent:GetCollisionGroup() == COLLISION_GROUP_DEBRIS
+    if ent:GetMaterial() == BLOODYGIBS.Gibs.Material and isDebris then
+        return BLOODYGIBS.Gibs.CanPickup
+    end
 end )
