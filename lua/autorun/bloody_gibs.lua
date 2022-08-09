@@ -313,7 +313,6 @@ local function wasPropKilled( ply, dmg )
 end
 
 hook.Add( "DoPlayerDeath", "bloodygibs_gibcheck", function( ply, _, dmg )
-    print( dmg:GetDamageType() )
     --Explosion
     if dmg:IsExplosionDamage() and not ply:Alive() then
         timer.Create( "checkgibcooldown", 0.0005, 1, function()
